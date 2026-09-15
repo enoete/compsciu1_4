@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circuits That Remember — CS Unit 1</title>
+
+<!-- ===== lesson manifest ===== -->
+<meta property="og:title" content="Circuits That Remember">
+<meta property="og:description" content="Flip-flops, latches, clocks and registers — how a handful of gates learns to hold on to something, and how to read the timing diagrams that trip everybody up.">
+<meta property="og:site_name" content="CS Unit 1 · CFBC">
+<meta name="description" content="SR, D, JK and T flip-flops, clock edges, timing diagrams, registers and counters, with a guided lab section.">
+<meta name="theme-color" content="#0E7C9B">
+<meta name="lesson:duration"   content="80 min">
+<meta name="lesson:difficulty" content="Core">
+<meta name="lesson:objectives" content="8">
+<meta name="lesson:questions"  content="36">
+<meta name="lesson:sections"   content="10">
+<meta name="lesson:topics"     content="Latches,SR flip-flop,D flip-flop,JK flip-flop,T flip-flop,Clock edges,Timing diagrams,Registers,Counters,Sequential circuits">
+<meta name="lesson:activities" content="Latch dissection,Clock bench,Four flip-flop benches,Timing diagram trainer,Register loader,Ripple counter,Lab guide,Unit test">
+<meta name="lesson:updated"    content="2026-09-15">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EDEFF2; --board:#FFFFFF; --ink:#16202C; --ink2:#556577; --ink3:#8996A5;
+  --line:#D2D9E1; --hot:#0E7C9B; --amber:#F2A93B; --violet:#5A4B9C; --mint:#118D77; --red:#E04B2F;
+  --lowbg:#DFE5EC; --hibg:#FFE9C7;
+  --shadow:0 1px 0 rgba(22,32,44,.06), 0 12px 28px -18px rgba(22,32,44,.5);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Work Sans",system-ui,sans-serif;font-size:17px;line-height:1.65;
+  background-image:linear-gradient(rgba(22,32,44,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(22,32,44,.03) 1px,transparent 1px);background-size:26px 26px}
+h1,h2,h3,h4{font-family:"Space Grotesk",system-ui,sans-serif;line-height:1.12;letter-spacing:-.02em;margin:0}
+p{margin:0 0 1em}
+.wrap{max-width:900px;margin:0 auto;padding:0 22px}
+.mono{font-family:"JetBrains Mono",monospace}
+:focus-visible{outline:3px solid var(--amber);outline-offset:3px;border-radius:4px}
+button{font:inherit}
+.hide{display:none!important}
+
+nav.top{position:sticky;top:0;z-index:50;background:rgba(237,239,242,.93);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav.top .wrap{display:flex;gap:4px;overflow-x:auto;padding:9px 22px}
+nav.top a{white-space:nowrap;text-decoration:none;color:var(--ink2);font-size:.84rem;font-weight:500;padding:6px 11px;border-radius:7px}
+nav.top a:hover{background:var(--board);color:var(--ink)}
+nav.top a.home{color:var(--hot);font-weight:600}
+
+.hero{padding:44px 0 14px}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:.78rem;color:var(--hot);font-weight:700}
+.hero h1{font-size:clamp(2.1rem,6vw,3.6rem);font-weight:700;margin:12px 0 0}
+.hero .lede{max-width:57ch;color:var(--ink2);font-size:1.08rem;margin-top:16px}
+
+section{padding:52px 0 8px}
+section>.wrap>h2{font-size:clamp(1.6rem,4vw,2.2rem);margin-bottom:6px}
+.sub{color:var(--ink2);max-width:62ch;margin-bottom:26px}
+.panel{background:var(--board);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow);margin-bottom:18px}
+.note{border-left:4px solid var(--violet);background:rgba(90,75,156,.06);border-radius:0 10px 10px 0;padding:14px 18px;margin:18px 0}
+.note.warn{border-left-color:var(--amber);background:#FFF6E6}
+.note.win{border-left-color:var(--mint);background:rgba(17,141,119,.07)}
+.note.real{border-left-color:var(--red);background:rgba(224,75,47,.06)}
+.note b{font-family:"Space Grotesk",sans-serif}
+.analogy{border-left:4px solid var(--amber);background:#FFF6E6;border-radius:0 10px 10px 0;padding:16px 18px;margin:0 0 20px}
+.analogy h4{font-size:1rem;margin-bottom:6px;color:#8A5B08}
+.analogy p{margin:0;font-size:.96rem;color:#5D4208}
+
+.btn{border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:9px;padding:10px 18px;font-size:.92rem;font-weight:600;cursor:pointer}
+.btn:hover{background:#0D1620}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{background:var(--paper)}
+.btn.accent{background:var(--hot);border-color:var(--hot)}
+.btn.warn{background:var(--red);border-color:var(--red)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+.feedback{margin-top:16px;padding:12px 16px;border-radius:10px;font-size:.94rem;display:none}
+.feedback.show{display:block}
+.feedback.good{background:rgba(17,141,119,.1);border-left:4px solid var(--mint)}
+.feedback.bad{background:rgba(224,75,47,.09);border-left:4px solid var(--red)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px}
+@media (max-width:720px){.two{grid-template-columns:1fr}}
+
+/* switches & lamps */
+.ctlrow{display:flex;align-items:center;gap:11px;margin-bottom:11px;flex-wrap:wrap}
+.ctlrow .lbl{font-family:"JetBrains Mono",monospace;font-size:.85rem;color:var(--ink2);min-width:6.5em}
+.sw{width:58px;height:30px;border-radius:999px;border:2px solid var(--line);background:var(--lowbg);position:relative;cursor:pointer;padding:0;transition:background .15s,border-color .15s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--board);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+.sw[aria-pressed="true"]{background:var(--amber);border-color:#D89321}
+.sw[aria-pressed="true"]::after{transform:translateX(28px)}
+.lamp{width:52px;height:52px;border-radius:50%;border:3px solid var(--line);background:var(--lowbg);display:grid;place-items:center;
+  font-family:"JetBrains Mono",monospace;font-weight:700;font-size:1.25rem;color:var(--ink3);transition:.18s}
+.lamp.on{background:var(--amber);border-color:#D89321;color:#2A1B00;box-shadow:0 0 0 7px rgba(242,169,59,.2)}
+.lamp.q{background:var(--lowbg)}
+.lamp.q.on{background:var(--hot);border-color:#0A6179;color:#fff;box-shadow:0 0 0 7px rgba(14,124,155,.2)}
+.lamp.bad{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 0 0 7px rgba(224,75,47,.22);animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.clkbtn{border:2px solid var(--hot);background:var(--board);color:var(--hot);border-radius:10px;padding:9px 16px;font-weight:700;font-size:.88rem;cursor:pointer;font-family:"JetBrains Mono",monospace}
+.clkbtn:active{background:var(--hot);color:#fff}
+.state{font-family:"JetBrains Mono",monospace;font-size:.86rem;color:var(--ink2);margin-top:10px}
+.badge{display:inline-block;font-size:.73rem;font-weight:600;border-radius:5px;padding:3px 9px;margin-left:6px}
+.badge.hold{background:var(--lowbg);color:var(--ink2)}
+.badge.set{background:rgba(17,141,119,.16);color:#0B5F50}
+.badge.reset{background:rgba(224,75,47,.14);color:#8E2A17}
+.badge.toggle{background:rgba(90,75,156,.14);color:var(--violet)}
+.badge.invalid{background:var(--red);color:#fff}
+
+table.tt{border-collapse:collapse;width:100%;font-family:"JetBrains Mono",monospace;font-size:.86rem}
+table.tt th,table.tt td{border:1px solid var(--line);padding:6px 7px;text-align:center}
+table.tt th{background:var(--paper);font-weight:700;font-size:.75rem;color:var(--ink2)}
+table.tt tr.hot td{background:var(--hibg)}
+table.tt td.bad{background:rgba(224,75,47,.16);color:#8E2A17;font-weight:700}
+.scope{width:100%;overflow-x:auto}
+.scope svg{display:block;min-width:520px;max-width:100%;height:auto}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.tab{border:1px solid var(--line);background:var(--board);border-radius:9px;padding:8px 15px;font-size:.88rem;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--hot);color:#fff;border-color:var(--hot)}
+.tab .tick{color:var(--mint)}
+.tab[aria-pressed="true"] .tick{color:#BFE8F2}
+footer{margin-top:60px;border-top:1px solid var(--line);padding:26px 0 56px;color:var(--ink3);font-size:.86rem}
+</style>
+</head>
+<body>
+
+<nav class="top"><div class="wrap">
+  <a class="home" href="https://enoete.github.io/compsciu1_hub/">← Unit 1 hub</a>
+  <a href="#remember">How it remembers</a>
+  <a href="#clock">The clock</a>
+  <a href="#four">The four flip-flops</a>
+  <a href="#timing">Timing diagrams</a>
+  <a href="#registers">Registers &amp; counters</a>
+  <a href="#lab">Lab guide</a>
+  <a href="#test">Unit test</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="eyebrow">TOPIC 04 · COMPUTER ARCHITECTURE</div>
+  <h1>Circuits that remember</h1>
+  <p class="lede">Everything you have built so far has the memory of a goldfish. Take the inputs away and an AND gate
+  forgets instantly — it only ever knows about right now. But your phone remembers your wallpaper after you turn it off
+  and on. Caps Lock stays on after you let go of the key. Something in there is <em>holding on</em>. This topic is about
+  the moment a circuit stops reacting and starts remembering, and it is the biggest step in the whole unit.</p>
+
+  <div class="panel" style="margin-top:26px">
+    <h3 style="margin-bottom:4px">Goldfish or elephant?</h3>
+    <p style="font-size:.92rem;color:var(--ink2);margin-bottom:18px">Hold each button down, then let go. Watch what
+    happens to the light when you release.</p>
+    <div class="two">
+      <div style="border:2px solid var(--line);border-radius:12px;padding:16px;text-align:center">
+        <h4 style="font-size:1rem;margin-bottom:10px">Plain AND gate</h4>
+        <button class="btn ghost" id="comboBtn" style="width:100%">Hold me down</button>
+        <div style="display:grid;place-items:center;margin-top:14px"><div class="lamp" id="comboLamp">0</div></div>
+        <p style="font-size:.85rem;color:var(--ink2);margin:12px 0 0" id="comboMsg">Nothing yet.</p>
+      </div>
+      <div style="border:2px solid var(--hot);border-radius:12px;padding:16px;text-align:center;background:rgba(14,124,155,.04)">
+        <h4 style="font-size:1rem;margin-bottom:10px">A latch</h4>
+        <button class="btn accent" id="seqBtn" style="width:100%">Tap me once</button>
+        <div style="display:grid;place-items:center;margin-top:14px"><div class="lamp q" id="seqLamp">0</div></div>
+        <p style="font-size:.85rem;color:var(--ink2);margin:12px 0 0" id="seqMsg">Nothing yet.</p>
+        <button class="btn ghost" id="seqClr" style="margin-top:10px;font-size:.82rem;padding:6px 12px">Reset it</button>
+      </div>
+    </div>
+  </div>
+</div></header>
+
+<section id="remember"><div class="wrap">
+  <h2>How can a circuit possibly remember?</h2>
+  <p class="sub">This is the question worth getting properly. Gates have no storage in them. No little box, no battery,
+  nowhere to write anything down. And yet two of them wired a certain way will hold a value for years. Here is the trick.</p>
+
+  <div class="analogy">
+    <h4>The rumour that keeps itself alive</h4>
+    <p>You tell Shanice something. Shanice tells Kemoy. Kemoy tells you. Now you are hearing it from Kemoy, so you tell
+    Shanice again — and round it goes. Nobody is <em>storing</em> the rumour anywhere. There is no notebook. It survives
+    purely because it keeps arriving back where it started. That loop <b>is</b> the memory. A latch does exactly this
+    with two gates: each one's output is wired into the other one's input, so each gate keeps telling the other what it
+    already believes. Cut the loop and the memory evaporates instantly, which is precisely why RAM forgets the moment
+    the current goes.</p>
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-bottom:4px">Take a latch apart</h3>
+    <p style="font-size:.93rem;color:var(--ink2);margin-bottom:16px">Two NOR gates, each one feeding the other.
+    Step through it and watch the loop lock itself in place.</p>
+    <div class="tabs" id="latchSteps"></div>
+    <div class="scope" id="latchSvg"></div>
+    <div class="feedback show good" id="latchMsg" style="margin-top:18px"></div>
+    <div class="btnrow">
+      <button class="btn accent" id="latchNext">Next step</button>
+      <button class="btn ghost" id="latchBack">Back</button>
+    </div>
+  </div>
+
+  <div class="note win"><b>The feedback wire is the entire invention.</b> Everything else on this page — SR, D, JK, T,
+  registers, RAM, the save button — is that one loop with extra controls bolted onto it. If you understand why the loop
+  holds, you understand sequential circuits. If you skip it and try to memorise four tables instead, this topic will
+  feel impossible, and that is not your fault; it is the wrong order.</div>
+
+  <div class="note"><b>Two names you now need.</b> Everything up to topic 3 was a <b>combinational</b> circuit: output
+  depends only on the inputs right now, no history, fully described by a truth table. From here on we are building
+  <b>sequential</b> circuits: output depends on the inputs <em>and</em> on what happened before. That is why a plain
+  truth table is no longer enough, and why we need characteristic tables and timing diagrams instead.</div>
+</div></section>
+
+<section id="clock"><div class="wrap">
+  <h2>The clock, and why edges matter</h2>
+  <p class="sub">A latch changes the instant its inputs change, which sounds fine until you have a million of them and
+  they all start updating at slightly different moments. So we put everything on a schedule.</p>
+
+  <div class="analogy">
+    <h4>Sports day, and nobody moves before the whistle</h4>
+    <p>Forty children on a start line. Some are faster, some are still tying a lace, one is looking at a bird. If they
+    each go whenever they feel ready, the race is chaos and the result is meaningless. So there is a whistle. Nobody
+    moves until it blows, and then everybody moves at once. A clock signal is that whistle, blowing a few billion times
+    a second, and the crucial part is this: what matters is <em>the moment the whistle sounds</em>, not how long the
+    sound lasts. That moment is called an <b>edge</b>, and almost everything in this topic hangs off it.</p>
+  </div>
+
+  <div class="panel">
+    <div class="two">
+      <div>
+        <div class="ctlrow"><span class="lbl">Speed</span>
+          <input type="range" id="clkSpeed" min="1" max="8" value="3" style="flex:1"><span class="mono" id="clkHz">3 Hz</span></div>
+        <div class="ctlrow"><span class="lbl">Triggers on</span>
+          <button class="tab" data-edge="rise" aria-pressed="true" id="edgeRise">Rising edge ↑</button>
+          <button class="tab" data-edge="fall" aria-pressed="false" id="edgeFall">Falling edge ↓</button></div>
+        <div class="btnrow">
+          <button class="btn accent" id="clkRun">Start</button>
+          <button class="btn ghost" id="clkStop">Stop</button>
+          <button class="clkbtn" id="clkTick">Single pulse</button>
+        </div>
+        <div class="state" id="clkState"></div>
+      </div>
+      <div><div class="scope" id="clkSvg"></div></div>
+    </div>
+    <div class="note warn" style="margin-bottom:0"><b>Level-triggered versus edge-triggered, and the mark it costs.</b>
+    A <b>latch</b> is level-triggered: while the clock is high it keeps watching its inputs, and anything that wobbles
+    during that window gets through. A <b>flip-flop</b> is edge-triggered: it takes one snapshot at the instant the
+    clock flips, and ignores everything else entirely. That single difference is the whole reason we bother building
+    flip-flops out of latches — and "state the difference between a latch and a flip-flop" is an exam question that
+    comes round like a birthday.</div>
+  </div>
+</div></section>
+
+<section id="four"><div class="wrap">
+  <h2>The four flip-flops</h2>
+  <p class="sub">Same loop underneath, four different sets of controls on the front. Click through them, flip the
+  switches, then pulse the clock and watch what changes — and, just as importantly, what does not.</p>
+
+  <div class="analogy">
+    <h4>Four remote controls for the same television</h4>
+    <p>SR is the old remote with separate ON and OFF buttons, and if you press both at once it sulks. D is the remote
+    with a single dial: whatever you set it to is what you get, no arguments. JK is the fancy one where pressing both
+    buttons together does something genuinely useful instead of breaking. T has a single button that just flips between
+    on and off, like the light switch in your bedroom. Same TV every time. Four ways of driving it, each convenient for
+    a different job.</p>
+  </div>
+
+  <div class="panel">
+    <div class="tabs" id="ffTabs"></div>
+    <div class="two">
+      <div>
+        <div id="ffCtl"></div>
+        <div class="btnrow" style="margin-top:4px">
+          <button class="clkbtn" id="ffClk">▲ Clock pulse</button>
+          <button class="btn ghost" id="ffReset">Reset to 0</button>
+        </div>
+        <div class="state" id="ffState"></div>
+      </div>
+      <div style="display:grid;place-items:center;gap:14px">
+        <div style="display:flex;gap:26px;align-items:center">
+          <div style="text-align:center"><div class="lamp q" id="ffQ">0</div>
+            <span class="mono" style="font-size:.78rem;color:var(--ink2)">Q</span></div>
+          <div style="text-align:center"><div class="lamp" id="ffQn">1</div>
+            <span class="mono" style="font-size:.78rem;color:var(--ink2)">Q′</span></div>
+        </div>
+        <div class="scope" id="ffSvg" style="width:100%"></div>
+      </div>
+    </div>
+    <div id="ffTable" style="margin-top:18px"></div>
+    <div id="ffNote"></div>
+  </div>
+
+  <div class="note real"><b>Where each one is hiding in your life.</b> The <b>SR latch</b> is the lift button that
+  stays lit after you press it, and goes out when the lift arrives. The <b>D flip-flop</b> is every register in every
+  processor — by a huge margin the most-manufactured circuit in history. The <b>T flip-flop</b> is Caps Lock: one key,
+  and each press flips it. And the <b>JK</b> is inside counters everywhere, including the scoreboard at Warner Park.</div>
+</div></section>
+
+<section id="timing"><div class="wrap">
+  <h2>Timing diagrams</h2>
+  <p class="sub">This is the bit that costs people marks, and it is not because it is hard. It is because nobody shows
+  them a method. Here is one, and then you are going to draw eight of them yourself.</p>
+
+  <div class="analogy">
+    <h4>A timing diagram is just a heart monitor for a wire</h4>
+    <p>You have seen the screen beside a hospital bed: a line crawling left to right, high when something is happening,
+    low when it is not. A timing diagram is exactly that, except there is one line per wire, all stacked up and sharing
+    the same left-to-right time axis. Nothing about it is clever. The only skill is reading <em>down</em> the page at
+    one moment in time instead of reading along it.</p>
+  </div>
+
+  <div class="panel" style="border-left:4px solid var(--hot)">
+    <h3 style="margin-bottom:12px">The method. Four steps, and do not improvise.</h3>
+    <ol style="margin:0;padding-left:20px;color:var(--ink2);font-size:.97rem">
+      <li><b style="color:var(--ink)">Mark the edges first.</b> Before you look at any input, draw a faint vertical
+        line down the whole diagram at every active clock edge. If it is a rising-edge device, that is every
+        <span class="mono">0→1</span>. Those lines are the only moments anything is allowed to happen.</li>
+      <li><b style="color:var(--ink)">At each line, read the inputs going down.</b> Not what they were doing a moment
+        before, not what they are about to do. What they are <em>at that instant</em>. This is where most marks are lost.</li>
+      <li><b style="color:var(--ink)">Apply the rule once.</b> D copies. T flips if T is 1. JK sets, resets, toggles or
+        holds. SR sets, resets or holds. One decision per line.</li>
+      <li><b style="color:var(--ink)">Draw Q flat until the next line.</b> Q is not allowed to move between edges.
+        If your Q wiggles somewhere in the middle of a cycle, you have made a mistake, guaranteed.</li>
+    </ol>
+    <div class="note win" style="margin-bottom:0"><b>The one that catches everybody.</b> An input can change six times
+    during a clock cycle and the flip-flop will not care about any of it. Only the value sitting on the input at the
+    instant of the edge counts. Examiners know this, which is why exam inputs wiggle around so much — they are checking
+    whether you are reading the edges or just eyeballing the shape.</div>
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-bottom:4px">Timing diagram trainer</h3>
+    <p style="font-size:.93rem;color:var(--ink2);margin-bottom:14px">Click in the <b>Q</b> row to set the level for
+    each clock cycle. Get it wrong and you will be told exactly which edge you slipped on.</p>
+    <div class="tabs" id="tdSel"></div>
+    <p class="sub" id="tdStory" style="margin-bottom:14px"></p>
+    <div class="scope" id="tdSvg"></div>
+    <div class="btnrow">
+      <button class="btn accent" id="tdCheck">Check my waveform</button>
+      <button class="btn ghost" id="tdClear">Clear</button>
+      <button class="btn ghost" id="tdHint">Walk me through edge 1</button>
+      <button class="btn ghost" id="tdShow">Show the answer</button>
+    </div>
+    <div class="feedback" id="tdFb"></div>
+  </div>
+</div></section>
+
+<section id="registers"><div class="wrap">
+  <h2>Putting them in a row</h2>
+  <p class="sub">One flip-flop holds one bit, which is not much use. Line up eight and clock them together and you have
+  something a computer can actually work with.</p>
+
+  <div class="analogy">
+    <h4>Eight sticky notes and one pen stroke</h4>
+    <p>One sticky note holds one thing. Fine. But if you line up eight of them and write across all eight at exactly
+    the same instant, you have captured something with real content — a number, a letter, an address. The trick is not
+    the notes. It is that they all get written <em>simultaneously</em>, because they all share one clock. That is a
+    register, and it is why the clock wire goes to every flip-flop rather than each one having its own.</p>
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-bottom:4px">8-bit register</h3>
+    <p style="font-size:.92rem;color:var(--ink2);margin-bottom:14px">Set the input bits to whatever you like — nothing
+    is stored yet. Then press Load and watch all eight land at once.</p>
+    <div id="regIn"></div>
+    <div class="btnrow">
+      <button class="clkbtn" id="regLoad">▲ Load</button>
+      <button class="btn ghost" id="regClr">Clear register</button>
+      <button class="btn ghost" id="regRand">Random input</button>
+    </div>
+    <div style="border-top:1px solid var(--line);margin:18px 0 14px"></div>
+    <div id="regOut"></div>
+    <div class="note" style="margin-bottom:0" id="regNote"></div>
+  </div>
+
+  <div class="panel">
+    <h3 style="margin-bottom:4px">Ripple counter</h3>
+    <p style="font-size:.92rem;color:var(--ink2);margin-bottom:14px">Four T flip-flops, each one clocked by the one
+    before it. Each stage halves the frequency, and the whole thing counts in binary without being told how.</p>
+    <div id="cntDisplay"></div>
+    <div class="btnrow">
+      <button class="clkbtn" id="cntTick">▲ Pulse</button>
+      <button class="btn accent" id="cntRun">Run</button>
+      <button class="btn ghost" id="cntStop">Stop</button>
+      <button class="btn ghost" id="cntReset">Reset</button>
+    </div>
+    <div class="state" id="cntState"></div>
+  </div>
+
+  <div class="note win"><b>Nobody designed a counter. It fell out.</b> A T flip-flop with T tied to 1 flips on every
+  pulse, so its output runs at half the speed of its clock. Feed that output into the next flip-flop's clock and you
+  get a quarter speed. Then an eighth. Line up four and read the outputs as a binary number and — without anybody
+  writing a single line of counting logic — it counts 0, 1, 2, 3, all the way to 15 and back to 0. Halving is counting.
+  Sit with that one for a second.</div>
+
+  <div class="note real"><b>Why it is called a "ripple" counter, and why that is a problem.</b> Each stage has to wait
+  for the one before it to flip, so a change ripples along the chain exactly like the carry in topic 3 did. For a
+  moment in the middle, the outputs show a number that was never meant to exist. Fine for blinking an LED, dangerous
+  for anything reading it. The fix is a <b>synchronous</b> counter where every flip-flop shares one clock — more gates,
+  no glitches, same trade you have now met three times.</div>
+</div></section>
+
+<section id="lab"><div class="wrap">
+  <h2>Lab guide</h2>
+  <p class="sub">Six builds in Logic.ly or CircuitVerse, in the order that makes each one easier than the last.
+  Read the pin section first — it is the reason most lab circuits sit there doing nothing.</p>
+
+  <div class="panel" style="border-left:4px solid var(--red)">
+    <h3 style="margin-bottom:6px">Read this before your circuit refuses to work</h3>
+    <p style="font-size:.95rem;color:var(--ink2)">Every flip-flop in the simulator has two extra pins you did not ask
+    for: <span class="mono">PRE′</span> and <span class="mono">CLR′</span>. They override everything else, instantly,
+    without waiting for the clock. And here is the part that catches everyone: <b>they are active LOW</b>. That little
+    prime mark means they do their job when you feed them a <b>0</b>.</p>
+    <div class="analogy" style="margin:16px 0">
+      <h4>The fire alarm beside the light switch</h4>
+      <p>Your classroom has light switches, and it also has a fire alarm. The alarm does not wait its turn, does not
+      care what the switches are doing, and overrides the entire room the instant it goes off. PRE′ and CLR′ are that
+      alarm. Leave them alone and the room works normally. Trip one by accident and nothing else you do matters.</p>
+    </div>
+    <table class="tt" style="font-size:.85rem"><thead><tr><th>Pin</th><th>Feed it 1</th><th>Feed it 0</th><th>What to do in labs</th></tr></thead>
+      <tbody>
+        <tr><td>PRE′</td><td>Nothing happens (normal)</td><td>Forces Q = 1 immediately</td><td>Toggle switch, left ON</td></tr>
+        <tr><td>CLR′</td><td>Nothing happens (normal)</td><td>Forces Q = 0 immediately</td><td>Toggle switch, left ON</td></tr>
+      </tbody></table>
+    <div class="note warn" style="margin-bottom:0"><b>If your flip-flop is stuck and will not respond to anything,
+    check these two first.</b> Nine times out of ten, one of them is floating or wired to 0, and your circuit is being
+    held down by an alarm you forgot you installed. Both to toggle switches, both switched ON, every single time \u2014
+    unless the lab specifically asks you to wire CLR′ to a push button as a reset.</div>
+  </div>
+
+  <div class="tabs" id="labSel"></div>
+  <div class="panel" id="labBody"></div>
+</div></section>
+
+<section id="test"><div class="wrap">
+  <h2>Unit test</h2>
+  <p class="sub">Thirty-six questions. Nothing is saved, nothing is sent, nobody sees your score but you. Every answer
+  is explained properly, and the breakdown at the end points you at the exact section to go back and play with.</p>
+
+  <div id="testIntro" class="panel">
+    <h3 style="margin-bottom:10px">What it covers</h3>
+    <ul style="color:var(--ink2);font-size:.96rem;margin:0;padding-left:20px">
+      <li><b>Part A</b> — memory, latches and why the loop works (7 questions)</li>
+      <li><b>Part B</b> — clocks, edges and triggering (7)</li>
+      <li><b>Part C</b> — the four flip-flops and their tables (12)</li>
+      <li><b>Part D</b> — timing diagrams (5)</li>
+      <li><b>Part E</b> — registers and counters (5)</li>
+    </ul>
+    <p style="font-size:.9rem;color:var(--ink3);margin-top:14px">Paper helps here more than anywhere else in the unit.
+    Sketch the waveform rather than trying to run it in your head.</p>
+    <div class="btnrow"><button class="btn accent" id="testStart">Start the test</button></div>
+  </div>
+
+  <div id="testRun" class="hide">
+    <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:18px">
+      <span class="mono" id="testPos"></span>
+      <div style="flex:1 1 180px;height:9px;background:var(--lowbg);border-radius:999px;overflow:hidden;min-width:140px">
+        <i id="testMeter" style="display:block;height:100%;background:var(--hot);width:0;transition:width .3s"></i></div>
+      <span class="mono" id="testScore"></span>
+    </div>
+    <div class="panel" id="qcard" style="margin-bottom:0"></div>
+    <div class="btnrow"><button class="btn ghost" id="testQuit">End test early</button></div>
+  </div>
+
+  <div id="testDone" class="hide">
+    <div class="panel" style="text-align:center;padding:34px 22px">
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:4.2rem;font-weight:700;line-height:1" id="doneScore"></div>
+      <div class="mono" style="font-size:1.1rem;color:var(--ink2)" id="doneGrade"></div>
+      <p style="max-width:44ch;margin:18px auto 0;color:var(--ink2)" id="doneMsg"></p>
+      <div style="display:grid;gap:10px;max-width:480px;margin:26px auto 0;text-align:left" id="doneBreak"></div>
+      <div class="btnrow" style="justify-content:center">
+        <button class="btn accent" id="retryWrong">Retry only what I missed</button>
+        <button class="btn ghost" id="retryAll">Start over</button>
+        <button class="btn ghost" id="reviewAll">Review every question</button>
+      </div>
+    </div>
+    <div id="reviewBox"></div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  Computer Science Unit 1 · Clarence Fitzroy Bryant College · Topic 4 of the unit.
+  Built for the classroom — nothing you do on this page is saved or sent anywhere.
+</div></footer>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const PR='\u2032';
+const ON='var(--amber)', OFF='var(--line)';
+const w=(x1,y1,x2,y2,on)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${on?ON:OFF}" stroke-width="${on?3.2:2.2}" stroke-linecap="round"/>`;
+const poly=(pts,on)=>`<polyline points="${pts}" fill="none" stroke="${on?ON:OFF}" stroke-width="${on?3.2:2.2}" stroke-linejoin="round" stroke-linecap="round"/>`;
+const dotAt=(x,y,on)=>`<circle cx="${x}" cy="${y}" r="3.6" fill="${on?ON:'var(--ink3)'}"/>`;
+const txt=(x,y,t,c,sz)=>`<text x="${x}" y="${y}" font-family="JetBrains Mono, monospace" font-size="${sz||11}" font-weight="700" fill="${c||'var(--ink2)'}">${esc(t)}</text>`;
+function norGate(x,y,gw,gh,colour){
+  const d=`M${x},${y} Q${x+gw*0.72},${y} ${x+gw},${y+gh/2} Q${x+gw*0.72},${y+gh} ${x},${y+gh} Q${x+gw*0.32},${y+gh/2} ${x},${y} z`;
+  return `<g style="color:${colour||'var(--violet)'}"><path d="${d}" fill="currentColor" opacity=".92"/>
+    <circle cx="${x+gw+5}" cy="${y+gh/2}" r="5" fill="var(--board)" stroke="currentColor" stroke-width="2.5"/></g>`;
+}
+
+/* ================= HERO: goldfish vs elephant ================= */
+let comboHeld=false, seqSet=false;
+function heroDraw(){
+  $('#comboLamp').textContent=comboHeld?1:0;
+  $('#comboLamp').classList.toggle('on',comboHeld);
+  $('#comboMsg').textContent=comboHeld?'On \u2014 but only while you hold it.':'Off again. It forgot the instant you let go.';
+  $('#seqLamp').textContent=seqSet?1:0;
+  $('#seqLamp').classList.toggle('on',seqSet);
+  $('#seqMsg').textContent=seqSet?'Still on. You let go ages ago and it does not care.':'Off. Tap it once and let go.';
+}
+const cb=$('#comboBtn');
+['mousedown','touchstart'].forEach(e=>cb.addEventListener(e,ev=>{ev.preventDefault();comboHeld=true;heroDraw();}));
+['mouseup','mouseleave','touchend'].forEach(e=>cb.addEventListener(e,()=>{comboHeld=false;heroDraw();}));
+$('#seqBtn').addEventListener('click',()=>{seqSet=true;heroDraw();});
+$('#seqClr').addEventListener('click',()=>{seqSet=false;heroDraw();});
+heroDraw();
+
+/* ================= LATCH DISSECTION ================= */
+const LATCH=[
+ {S:0,R:0,Q:0,Qn:1,t:'The loop',
+  m:`Two NOR gates. The top one's output is called <b>Q</b>; the bottom one's is <b>Q\u2032</b>, and it is always the opposite.
+     Now look at the crossing wires: <b>Q feeds back into the bottom gate, and Q\u2032 feeds back into the top one</b>.
+     Neither gate can settle without asking the other. Right now Q is 0 and Q\u2032 is 1, and each one is confirming
+     the other's answer. Nothing is stored anywhere. The agreement is the storage.`},
+ {S:1,R:0,Q:1,Qn:0,t:'Press SET',
+  m:`S goes to 1. A NOR gate outputs 0 if <em>any</em> input is 1, so the bottom gate is forced to 0 \u2014 Q\u2032 becomes 0.
+     That 0 travels round to the top gate, which now sees 0 and 0, so it outputs 1. Q is 1. The latch is set.`},
+ {S:0,R:0,Q:1,Qn:0,t:'Let go of SET',
+  m:`<b>This is the whole topic in one step.</b> S is back to 0. Nothing is pushing Q up any more. And yet Q is still 1
+     \u2014 because Q feeds the bottom gate, keeping Q\u2032 at 0, which feeds the top gate, keeping Q at 1. The loop is
+     holding itself up by its own bootstraps. You could go to lunch and come back and it would still be 1.`},
+ {S:0,R:1,Q:0,Qn:1,t:'Press RESET',
+  m:`R goes to 1. Now the <em>top</em> gate is forced to 0, so Q drops to 0. That 0 goes round to the bottom gate,
+     which sees 0 and 0 and outputs 1. Q\u2032 is 1. Mirror image of setting it.`},
+ {S:0,R:0,Q:0,Qn:1,t:'Let go of RESET',
+  m:`R back to 0, and Q stays at 0 for exactly the same reason it stayed at 1 before. The loop does not care which
+     value it is holding. It just holds. That is a one-bit memory, built from two gates and a pair of crossed wires.`},
+ {S:1,R:1,Q:0,Qn:0,t:'Press both at once',
+  m:`<b>Now it breaks.</b> Both gates have a 1 on an input, so both are forced to output 0. Q = 0 and Q\u2032 = 0 \u2014
+     but Q\u2032 is supposed to be the <em>opposite</em> of Q, always. The circuit is now telling you a thing that cannot
+     be true. This is the famous <b>invalid state</b>, and it is the reason the SR flip-flop got replaced.`},
+ {S:0,R:0,Q:'?',Qn:'?',t:'Now let go of both',
+  m:`Release both at the same instant and both gates try to flip to 1 simultaneously \u2014 then each sees the other's 1
+     and tries to drop back to 0. Whichever gate happens to be a few billionths of a second faster wins, and you cannot
+     know which. This is called a <b>race condition</b>. The final state is genuinely unpredictable, and in a real
+     machine that means a bug you can never reproduce.`}
+];
+let li=0;
+function latchDraw(){
+  const s=LATCH[li], live=s.Q!=='?';
+  $('#latchSteps').innerHTML=LATCH.map((x,i)=>
+    `<button class="tab" data-i="${i}" aria-pressed="${i===li}">${i+1}. ${esc(x.t)}</button>`).join('');
+  const q=live?s.Q:0, qn=live?s.Qn:0;
+  let g='';
+  g+=txt(4,32,'R',s.R?ON:'var(--ink2)')+w(20,28,120,28,s.R);
+  g+=txt(4,146,'S',s.S?ON:'var(--ink2)')+w(20,142,120,142,s.S);
+  g+=norGate(120,16,54,46,'var(--violet)');
+  g+=norGate(120,108,54,46,'var(--violet)');
+  g+=txt(132,44,'NOR','#fff',10)+txt(132,136,'NOR','#fff',10);
+  g+=w(184,39,330,39,q)+w(184,131,330,131,qn);
+  g+=txt(338,44,'Q = '+(live?s.Q:'?'),q?ON:'var(--ink)',13);
+  g+=txt(338,136,'Q'+PR+' = '+(live?s.Qn:'?'),qn?ON:'var(--ink)',13);
+  // Q' feeds back up into the top gate
+  g+=dotAt(250,131,qn)+poly('250,131 250,78 100,78 100,50 120,50',qn);
+  // Q feeds back down into the bottom gate
+  g+=dotAt(282,39,q)+poly('282,39 282,96 84,96 84,120 120,120',q);
+  g+=txt(150,76,'Q'+PR+' back to the top gate','var(--ink3)',9.5);
+  g+=txt(150,110,'Q back to the bottom gate','var(--ink3)',9.5);
+  if(!live) g+=`<rect x="110" y="8" width="240" height="156" fill="rgba(224,75,47,.07)" rx="10"/>`+
+               txt(180,90,'unpredictable','var(--red)',14);
+  $('#latchSvg').innerHTML=`<svg viewBox="0 0 470 180">${g}</svg>`;
+  const bad=(s.S&&s.R)||!live;
+  $('#latchMsg').className='feedback show '+(bad?'bad':'good');
+  $('#latchMsg').innerHTML=`<b>Step ${li+1} \u00b7 ${esc(s.t)} \u00b7 S=${s.S} R=${s.R}.</b> ${s.m}`;
+  $('#latchBack').disabled=li===0;
+  $('#latchNext').textContent=li===LATCH.length-1?'Back to the start':'Next step';
+}
+$('#latchSteps').addEventListener('click',e=>{const b=e.target.closest('.tab');if(b){li=+b.dataset.i;latchDraw();}});
+$('#latchNext').addEventListener('click',()=>{li=(li+1)%LATCH.length;latchDraw();});
+$('#latchBack').addEventListener('click',()=>{if(li>0){li--;latchDraw();}});
+latchDraw();
+
+/* ================= CLOCK BENCH ================= */
+const CLK={hz:3,edge:'rise',run:null,t:0,ticks:0};
+function clkDraw(){
+  const cyc=6, cw=76, h=54, y0=18;
+  let g='', x=10;
+  const pts=[];
+  for(let i=0;i<cyc;i++){
+    pts.push(`${x},${y0+h}`,`${x},${y0}`,`${x+cw/2},${y0}`,`${x+cw/2},${y0+h}`,`${x+cw},${y0+h}`);
+    x+=cw;
+  }
+  g+=poly(pts.join(' '),true);
+  for(let i=0;i<cyc;i++){
+    const ex=10+i*cw, fx=ex+cw/2, act=CLK.edge==='rise'?ex:fx;
+    g+=`<line x1="${act}" y1="6" x2="${act}" y2="${y0+h+26}" stroke="var(--hot)" stroke-width="2" stroke-dasharray="4 4"/>`;
+    g+=`<circle cx="${act}" cy="${y0+(CLK.edge==='rise'?0:h)}" r="5" fill="var(--hot)"/>`;
+    g+=txt(act-5,y0+h+40,CLK.edge==='rise'?'\u2191':'\u2193','var(--hot)',13);
+  }
+  const cur=(CLK.ticks%cyc);
+  g+=`<rect x="${10+cur*cw}" y="6" width="${cw}" height="${h+16}" fill="rgba(242,169,59,.16)" rx="6"/>`;
+  g+=txt(4,y0-6,'CLK','var(--ink2)',10);
+  $('#clkSvg').innerHTML=`<svg viewBox="0 0 ${10+cyc*cw+14} 130">${g}</svg>`;
+  $('#clkHz').textContent=CLK.hz+' Hz';
+  $('#clkState').innerHTML=`period = 1 \u00f7 ${CLK.hz} = <b>${(1/CLK.hz).toFixed(3)} s</b> &nbsp;\u00b7&nbsp;
+    pulses so far: <b>${CLK.ticks}</b><br><span style="color:var(--ink3)">Frequency is pulses per second. Period is
+    seconds per pulse. They are reciprocals, and an exam will ask you to convert one to the other.</span>`;
+}
+$('#clkSpeed').addEventListener('input',e=>{CLK.hz=+e.target.value;clkDraw();
+  if(CLK.run){clearInterval(CLK.run);CLK.run=setInterval(()=>{CLK.ticks++;clkDraw();},1000/CLK.hz);}});
+$('#edgeRise').addEventListener('click',()=>{CLK.edge='rise';$('#edgeRise').setAttribute('aria-pressed','true');$('#edgeFall').setAttribute('aria-pressed','false');clkDraw();});
+$('#edgeFall').addEventListener('click',()=>{CLK.edge='fall';$('#edgeFall').setAttribute('aria-pressed','true');$('#edgeRise').setAttribute('aria-pressed','false');clkDraw();});
+$('#clkRun').addEventListener('click',()=>{clearInterval(CLK.run);CLK.run=setInterval(()=>{CLK.ticks++;clkDraw();},1000/CLK.hz);});
+$('#clkStop').addEventListener('click',()=>{clearInterval(CLK.run);CLK.run=null;});
+$('#clkTick').addEventListener('click',()=>{CLK.ticks++;clkDraw();});
+clkDraw();
+
+/* ================= THE FOUR FLIP-FLOPS ================= */
+const FF={
+ SR:{name:'SR',ins:['S','R'],
+   eq:'Q(next) = S + R'+PR+'\u00b7Q',
+   next:(v,q)=>v.S&&v.R?'X':v.S?1:v.R?0:q,
+   act:(v,q)=>v.S&&v.R?['invalid','Invalid \u2014 both inputs high']:v.S?['set','Set: Q forced to 1']:v.R?['reset','Reset: Q forced to 0']:['hold','Hold: nothing changes'],
+   rows:[['0','0','Q','Hold'],['0','1','0','Reset'],['1','0','1','Set'],['1','1','X','INVALID']],
+   note:`<div class="note warn"><b>The flaw that killed it.</b> S = R = 1 is not just "undefined on paper" \u2014 the
+     circuit genuinely cannot produce a consistent answer, and when you release both inputs the result is a race nobody
+     can predict. You still have to learn the SR flip-flop because everything else is built from it, but almost nothing
+     modern uses one directly.</div>`},
+ D:{name:'D',ins:['D'],
+   eq:'Q(next) = D',
+   next:(v)=>v.D,
+   act:(v)=>v.D?['set','Stores a 1 on the next edge']:['reset','Stores a 0 on the next edge'],
+   rows:[['0','\u2014','0','Store 0'],['1','\u2014','1','Store 1']],
+   note:`<div class="note win"><b>The most-built circuit in history, and the simplest.</b> One input, one rule:
+     whatever D is at the clock edge becomes Q. It cannot have an invalid state because it only has one input to
+     contradict. Every register, every pipeline stage, every memory cell in a CPU is made of these. If you only
+     properly learn one flip-flop, learn this one.</div>`},
+ JK:{name:'JK',ins:['J','K'],
+   eq:'Q(next) = J\u00b7Q'+PR+' + K'+PR+'\u00b7Q',
+   next:(v,q)=>v.J&&v.K?(q?0:1):v.J?1:v.K?0:q,
+   act:(v,q)=>v.J&&v.K?['toggle','Toggle: Q flips to '+(q?0:1)]:v.J?['set','Set: Q forced to 1']:v.K?['reset','Reset: Q forced to 0']:['hold','Hold: nothing changes'],
+   rows:[['0','0','Q','Hold'],['0','1','0','Reset'],['1','0','1','Set'],['1','1','Q'+PR,'TOGGLE']],
+   note:`<div class="note win"><b>They took the broken row and made it the useful one.</b> SR falls apart when both
+     inputs are 1. JK takes that exact combination and defines it as "flip to the opposite". Nothing is undefined any
+     more, and you gain a toggle mode for free \u2014 which is what makes counters possible. This is why JK is called
+     the universal flip-flop: tie J and K together and it is a T, feed K the inverse of J and it is a D.</div>`},
+ T:{name:'T',ins:['T'],
+   eq:'Q(next) = T \u2295 Q',
+   next:(v,q)=>v.T?(q?0:1):q,
+   act:(v,q)=>v.T?['toggle','Toggle: Q flips to '+(q?0:1)]:['hold','Hold: nothing changes'],
+   rows:[['0','\u2014','Q','Hold'],['1','\u2014','Q'+PR,'Toggle']],
+   note:`<div class="note real"><b>This is Caps Lock.</b> One key, and each press flips the state. It is also every
+     binary counter ever built, because a thing that flips on every pulse is running at exactly half the speed of its
+     clock \u2014 and halving, chained up, is counting. A T flip-flop is a JK with J and K wired together.</div>`}
+};
+let ffType='SR', ffQ=0, ffV={S:0,R:0,D:0,J:0,K:0,T:0}, ffLast='';
+function ffDraw(){
+  const f=FF[ffType];
+  $('#ffTabs').innerHTML=Object.keys(FF).map(k=>
+    `<button class="tab" data-t="${k}" aria-pressed="${k===ffType}">${k} flip-flop</button>`).join('');
+  $('#ffCtl').innerHTML=f.ins.map(i=>`<div class="ctlrow"><span class="lbl">${esc(i)}</span>
+    <button class="sw" data-i="${esc(i)}" aria-pressed="${!!ffV[i]}" aria-label="${esc(i)}"></button>
+    <span class="mono" style="font-weight:700">${ffV[i]}</span></div>`).join('')
+    +`<div class="ctlrow"><span class="lbl">CLK</span><span style="font-size:.84rem;color:var(--ink3)">use the pulse button \u2193</span></div>`;
+  const [cls,msg]=f.act(ffV,ffQ);
+  const nxt=f.next(ffV,ffQ);
+  $('#ffState').innerHTML=`<span class="mono">${esc(f.eq)}</span><br>
+    Q is <b>${ffQ}</b> now. On the next clock edge it becomes <b>${nxt}</b>.
+    <span class="badge ${cls}">${esc(msg)}</span>${ffLast?`<br><span style="color:var(--ink3)">${ffLast}</span>`:''}`;
+  const bad=nxt==='X';
+  $('#ffQ').textContent=ffQ; $('#ffQ').classList.toggle('on',!!ffQ);
+  $('#ffQn').textContent=ffQ?0:1; $('#ffQn').classList.toggle('on',!ffQ);
+  $('#ffQ').classList.toggle('bad',bad);
+  // simple block symbol
+  let g='';
+  const bx=70,by=14,bw=110,bh=110;
+  g+=`<rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="8" fill="var(--board)" stroke="var(--ink)" stroke-width="2.5"/>`;
+  g+=txt(bx+bw/2-12,by+bh/2+6,f.name,'var(--ink)',22);
+  f.ins.forEach((i,k)=>{const y=by+bh*(k+1)/(f.ins.length+2);
+    g+=w(6,y,bx,y,ffV[i])+txt(0,y-6,i,ffV[i]?ON:'var(--ink2)');});
+  const cy=by+bh*(f.ins.length+1)/(f.ins.length+2);
+  g+=w(6,cy,bx,cy,false)+txt(0,cy-6,'CLK','var(--hot)');
+  g+=`<polyline points="${bx},${cy-7} ${bx+12},${cy} ${bx},${cy+7}" fill="none" stroke="var(--ink)" stroke-width="2"/>`;
+  g+=w(bx+bw,by+34,bx+bw+56,by+34,ffQ)+txt(bx+bw+62,by+39,'Q','var(--ink)',13);
+  g+=w(bx+bw,by+78,bx+bw+56,by+78,!ffQ)+txt(bx+bw+62,by+83,'Q'+PR,'var(--ink)',13);
+  $('#ffSvg').innerHTML=`<svg viewBox="0 0 280 140" style="min-width:0">${g}</svg>`;
+  const hdr=f.ins.length===2?f.ins:[f.ins[0],''];
+  $('#ffTable').innerHTML=`<table class="tt"><thead><tr>
+    <th>${esc(hdr[0])}</th><th>${esc(hdr[1]||'')}</th><th>Q(next)</th><th>What it does</th></tr></thead><tbody>`
+    +f.rows.map(r=>{
+      const live=f.ins.length===2 ? (String(ffV[f.ins[0]])===r[0]&&String(ffV[f.ins[1]])===r[1])
+                                  : String(ffV[f.ins[0]])===r[0];
+      return `<tr class="${live?'hot':''}"><td>${esc(r[0])}</td><td>${esc(r[1])}</td>
+        <td class="${r[2]==='X'?'bad':''}">${esc(r[2])}</td><td>${esc(r[3])}</td></tr>`;}).join('')
+    +`</tbody></table>`;
+  $('#ffNote').innerHTML=f.note;
+}
+$('#ffTabs').addEventListener('click',e=>{const b=e.target.closest('.tab');
+  if(b){ffType=b.dataset.t;ffLast='';ffDraw();}});
+$('#ffCtl').addEventListener('click',e=>{const b=e.target.closest('[data-i]');
+  if(b){ffV[b.dataset.i]^=1;ffDraw();}});
+$('#ffClk').addEventListener('click',()=>{
+  const f=FF[ffType], n=f.next(ffV,ffQ);
+  if(n==='X'){ffLast='\u26a0 Clock pulsed with S=R=1. In a real circuit the outputs are now both 0 and the next move is a coin flip.';ffDraw();return;}
+  const before=ffQ; ffQ=n;
+  ffLast=before===ffQ?`Clock pulsed \u2014 Q stayed at ${ffQ}. A pulse does not mean a change.`
+                     :`Clock pulsed \u2014 Q went ${before} \u2192 ${ffQ}.`;
+  ffDraw();
+});
+$('#ffReset').addEventListener('click',()=>{ffQ=0;ffLast='Forced to 0 (this is what CLR\u2032 does in the lab).';ffDraw();});
+ffDraw();
+
+/* ================= TIMING DIAGRAM TRAINER ================= */
+const N=8, X0=54, CW=58, WHI=0, WLO=1;   // WHI/WLO used as offsets inside a row
+const TD=[
+ {t:'D flip-flop', type:'D', q0:0, sig:{D:[1,1,0,0,1,0,0,1]},
+  story:'The gentlest one. D copies straight across on every rising edge \u2014 so the Q waveform is the D waveform shifted to line up with the edges.'},
+ {t:'T flip-flop', type:'T', q0:0, sig:{T:[1,1,0,1,1,1,0,1]},
+  story:'T flips Q when T is 1 and leaves it alone when T is 0. Notice that Q stays flat across the cycles where T is low \u2014 a clock pulse with T=0 does nothing at all.'},
+ {t:'JK flip-flop', type:'JK', q0:0, sig:{J:[1,0,1,1,0,0,1,1],K:[0,1,0,1,1,0,0,1]},
+  story:'All four behaviours appear here: set, reset, toggle and hold. Read both J and K at each edge before deciding \u2014 this is where people rush and lose the mark.'},
+ {t:'SR flip-flop', type:'SR', q0:0, sig:{S:[1,0,0,1,0,0,1,0],R:[0,0,1,0,0,1,0,0]},
+  story:'Set, reset, hold. This particular input pattern never has S and R high together, which is deliberate \u2014 a well-designed circuit never lets that happen.'},
+ {t:'Divide by two', type:'JK', q0:0, sig:{J:[1,1,1,1,1,1,1,1],K:[1,1,1,1,1,1,1,1]},
+  story:'J and K are tied high for the whole run, so it toggles on every single edge. Look at the shape of Q when you finish: it is a square wave at exactly half the clock frequency. This is the entire principle behind counters.'}
+];
+const tdNext={
+ D:(v,q)=>v.D, T:(v,q)=>v.T?(q?0:1):q,
+ JK:(v,q)=>v.J&&v.K?(q?0:1):v.J?1:v.K?0:q,
+ SR:(v,q)=>v.S&&v.R?'X':v.S?1:v.R?0:q
+};
+const tdWhy={
+ D:(v,q,n)=>`D is ${v.D} at that edge, so Q copies it and becomes ${n}.`,
+ T:(v,q,n)=>v.T?`T is 1, so Q toggles from ${q} to ${n}.`:`T is 0, so Q holds at ${q}. A clock pulse on its own changes nothing.`,
+ JK:(v,q,n)=>v.J&&v.K?`J and K are both 1, so Q toggles from ${q} to ${n}.`
+   :v.J?`J is 1 and K is 0, so Q is set to 1.`:v.K?`K is 1 and J is 0, so Q is reset to 0.`
+   :`J and K are both 0, so Q holds at ${q}.`,
+ SR:(v,q,n)=>v.S?`S is 1, so Q is set to 1.`:v.R?`R is 1, so Q is reset to 0.`:`S and R are both 0, so Q holds at ${q}.`
+};
+let tdI=0, tdQ=Array(N).fill(null);
+
+function tdCorrect(ex){
+  let q=ex.q0; const out=[];
+  for(let i=0;i<N;i++){
+    const v={}; Object.keys(ex.sig).forEach(k=>v[k]=ex.sig[k][i]);
+    q=tdNext[ex.type](v,q); out.push(q);
+  }
+  return out;
+}
+function wave(arr,y,h,colour,clickable,badIdx){
+  let s='', prev=null;
+  for(let i=0;i<N;i++){
+    const v=arr[i], x=X0+i*CW;
+    if(v===null){
+      s+=`<rect x="${x}" y="${y}" width="${CW}" height="${h}" fill="rgba(22,32,44,.045)" ${clickable?`class="qcell" data-i="${i}" style="cursor:pointer"`:''}/>`;
+      s+=txt(x+CW/2-3,y+h/2+4,'?','var(--ink3)',12); prev=null; continue;
+    }
+    const yy=v?y:y+h;
+    if(prev!==null&&prev!==v) s+=`<line x1="${x}" y1="${y}" x2="${x}" y2="${y+h}" stroke="${colour}" stroke-width="3"/>`;
+    s+=`<line x1="${x}" y1="${yy}" x2="${x+CW}" y2="${yy}" stroke="${colour}" stroke-width="3" stroke-linecap="round"/>`;
+    if(clickable) s+=`<rect x="${x}" y="${y-4}" width="${CW}" height="${h+8}" fill="transparent" class="qcell" data-i="${i}" style="cursor:pointer"/>`;
+    if(badIdx!==undefined&&badIdx===i) s+=`<rect x="${x}" y="${y-6}" width="${CW}" height="${h+12}" fill="rgba(224,75,47,.16)" rx="4"/>`;
+    prev=v;
+  }
+  return s;
+}
+function tdDraw(badIdx){
+  const ex=TD[tdI], keys=Object.keys(ex.sig);
+  $('#tdSel').innerHTML=TD.map((x,i)=>`<button class="tab" data-i="${i}" aria-pressed="${i===tdI}">${i+1}. ${esc(x.t)}</button>`).join('');
+  $('#tdStory').textContent=ex.story;
+  const rowH=30, gap=24;
+  let y=14, g='';
+  // clock
+  let cp=[];
+  for(let i=0;i<N;i++){const x=X0+i*CW;cp.push(`${x},${y+rowH}`,`${x},${y}`,`${x+CW/2},${y}`,`${x+CW/2},${y+rowH}`,`${x+CW},${y+rowH}`);}
+  g+=poly(cp.join(' '),false).replace(/stroke="[^"]*"/,'stroke="var(--ink)"');
+  g+=txt(4,y+20,'CLK','var(--ink)',12);
+  for(let i=0;i<N;i++){const x=X0+i*CW;
+    g+=`<line x1="${x}" y1="${y-6}" x2="${x}" y2="${y+ (keys.length+2)*(rowH+gap)+6}" stroke="var(--hot)" stroke-width="1.5" stroke-dasharray="3 5" opacity=".75"/>`;
+    g+=`<circle cx="${x}" cy="${y}" r="4" fill="var(--hot)"/>`;
+    g+=txt(x+4,y-8,String(i+1),'var(--hot)',10);}
+  y+=rowH+gap;
+  keys.forEach(k=>{
+    g+=txt(4,y+20,k,'var(--amber)',12)+wave(ex.sig[k],y,rowH,'var(--amber)',false);
+    y+=rowH+gap;
+  });
+  g+=txt(4,y+20,'Q','var(--hot)',13)+wave(tdQ,y,rowH,'var(--hot)',true,badIdx);
+  g+=txt(X0,y+rowH+22,'click in the Q row to set each cycle high or low','var(--ink3)',10);
+  $('#tdSvg').innerHTML=`<svg viewBox="0 0 ${X0+N*CW+16} ${y+rowH+34}">${g}</svg>`;
+}
+$('#tdSel').addEventListener('click',e=>{const b=e.target.closest('.tab');
+  if(b){tdI=+b.dataset.i;tdQ=Array(N).fill(null);$('#tdFb').className='feedback';tdDraw();}});
+$('#tdSvg').addEventListener('click',e=>{
+  const c=e.target.closest('.qcell'); if(!c)return;
+  const i=+c.dataset.i;
+  tdQ[i]=tdQ[i]===null?1:(tdQ[i]===1?0:null);
+  tdDraw();
+});
+$('#tdClear').addEventListener('click',()=>{tdQ=Array(N).fill(null);$('#tdFb').className='feedback';tdDraw();});
+const tfb=(ok,html,bad)=>{const f=$('#tdFb');f.className='feedback show '+(ok?'good':'bad');f.innerHTML=html;tdDraw(bad);};
+$('#tdHint').addEventListener('click',()=>{
+  const ex=TD[tdI], v={}; Object.keys(ex.sig).forEach(k=>v[k]=ex.sig[k][0]);
+  const n=tdNext[ex.type](v,ex.q0);
+  tfb(true,`<b>Edge 1, walked through.</b> Step one: the first dashed line is at the start of cycle 1.
+    Step two: read down that line \u2014 ${Object.keys(ex.sig).map(k=>`${k} is <b>${v[k]}</b>`).join(', ')},
+    and Q was <b>${ex.q0}</b> before the edge. Step three: ${tdWhy[ex.type](v,ex.q0,n)}
+    Step four: draw Q at <b>${n}</b> flat across the whole of cycle 1. Now do the other seven the same way.`,0);
+});
+$('#tdShow').addEventListener('click',()=>{
+  tdQ=tdCorrect(TD[tdI]).slice();
+  tfb(true,`<b>There it is.</b> Compare it against what you had and find the first cycle where they differ \u2014 that
+    is the edge you misread, and every cycle after it was wrong for the same reason.`);
+});
+$('#tdCheck').addEventListener('click',()=>{
+  const ex=TD[tdI], want=tdCorrect(ex);
+  const blank=tdQ.findIndex(x=>x===null);
+  if(blank>=0) return tfb(false,`<b>Cycle ${blank+1} is still empty.</b> Every cycle needs a level \u2014 click in the
+    Q row to cycle it between high, low and blank.`,blank);
+  const bad=tdQ.findIndex((x,i)=>x!==want[i]);
+  if(bad<0){
+    const extra=ex.type==='JK'&&ex.sig.J.every(x=>x)
+      ? ' Look at the shape: Q completes one full cycle for every two clock cycles. You have just drawn a frequency divider.'
+      : ex.type==='D' ? ' Notice Q is the D waveform with every wobble between edges removed \u2014 that filtering is exactly what edge-triggering buys you.' : '';
+    return tfb(true,`<b>All eight cycles correct.</b> ${esc(ex.t)} done.${extra}`);
+  }
+  const v={}; Object.keys(ex.sig).forEach(k=>v[k]=ex.sig[k][bad]);
+  const prev=bad===0?ex.q0:want[bad-1];
+  tfb(false,`<b>First slip is at edge ${bad+1}.</b> At that dashed line,
+    ${Object.keys(ex.sig).map(k=>`${k} = <b>${v[k]}</b>`).join(' and ')}, and Q was <b>${prev}</b> coming in.
+    ${tdWhy[ex.type](v,prev,want[bad])} So Q should be <b>${want[bad]}</b> across cycle ${bad+1}, not ${tdQ[bad]}.
+    Fix that one and re-check \u2014 everything after it probably falls into place.`,bad);
+});
+tdDraw();
+
+/* ================= REGISTER ================= */
+let regI=[0,0,0,0,0,0,0,0], regS=[0,0,0,0,0,0,0,0], regLoaded=false;
+const bits2dec=a=>a.reduce((n,x)=>n*2+x,0);
+function regDraw(){
+  const cell=(v,i,click)=>`<button class="lamp ${click?'':'q'} ${v?'on':''}" ${click?`data-b="${i}"`:''}
+    style="width:42px;height:46px;border-radius:9px;font-size:1.05rem;${click?'':'cursor:default'}">${v}</button>`;
+  $('#regIn').innerHTML=`<p class="lbl" style="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--ink2);margin-bottom:8px">
+      Data inputs (click to change \u2014 nothing is stored yet)</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${regI.map((v,i)=>cell(v,i,true)).join('')}</div>
+    <p class="mono" style="font-size:.86rem;color:var(--ink2);margin-top:8px">${regI.join('')} = ${bits2dec(regI)} decimal</p>`;
+  $('#regOut').innerHTML=`<p class="lbl" style="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--ink2);margin-bottom:8px">
+      Stored in the register (8 D flip-flops)</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${regS.map((v,i)=>cell(v,i,false)).join('')}</div>
+    <p class="mono" style="font-size:.86rem;color:var(--ink2);margin-top:8px">${regS.join('')} = ${bits2dec(regS)} decimal</p>`;
+  $('#regNote').innerHTML=regLoaded
+    ? `<b>All eight landed on the same edge.</b> Not one after another \u2014 simultaneously, because every flip-flop
+       shares the one clock wire. That is the whole reason a register can hold a meaningful number rather than a smear
+       of half-updated bits.`
+    : `<b>Change the inputs as much as you like.</b> The stored row will not move, because a D flip-flop ignores its
+       input completely until a clock edge arrives. Press Load when you are ready.`;
+}
+$('#regIn').addEventListener('click',e=>{const b=e.target.closest('[data-b]');
+  if(b){regI[+b.dataset.b]^=1;regLoaded=false;regDraw();}});
+$('#regLoad').addEventListener('click',()=>{regS=regI.slice();regLoaded=true;regDraw();});
+$('#regClr').addEventListener('click',()=>{regS=[0,0,0,0,0,0,0,0];regLoaded=false;regDraw();});
+$('#regRand').addEventListener('click',()=>{regI=regI.map(()=>Math.random()<.5?1:0);regLoaded=false;regDraw();});
+regDraw();
+
+/* ================= RIPPLE COUNTER ================= */
+const CNT={q:[0,0,0,0],n:0,run:null};   // q[0] = LSB
+function cntDraw(){
+  const val=CNT.q[3]*8+CNT.q[2]*4+CNT.q[1]*2+CNT.q[0];
+  $('#cntDisplay').innerHTML=`<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center">
+    ${[3,2,1,0].map(i=>`<div style="text-align:center">
+      <div class="lamp q ${CNT.q[i]?'on':''}" style="width:52px;height:52px">${CNT.q[i]}</div>
+      <span class="mono" style="font-size:.72rem;color:var(--ink2)">Q${i} \u00f7${2**(i+1)}</span></div>`).join('')}
+    <div style="font-family:'Space Grotesk',sans-serif;font-size:3rem;font-weight:700;margin-left:10px;color:var(--hot)">${val}</div>
+  </div>`;
+  $('#cntState').innerHTML=`binary <b>${[3,2,1,0].map(i=>CNT.q[i]).join('')}</b> = decimal <b>${val}</b>
+    &nbsp;\u00b7&nbsp; pulses: ${CNT.n}<br>
+    <span style="color:var(--ink3)">Q0 flips every pulse, Q1 every two, Q2 every four, Q3 every eight.
+    Nobody wrote counting logic \u2014 the halving does it.</span>`;
+}
+function cntTick(){
+  CNT.n++;
+  for(let i=0;i<4;i++){ CNT.q[i]^=1; if(CNT.q[i]) break; }   // ripple: carry only while flipping 1->0
+  cntDraw();
+}
+$('#cntTick').addEventListener('click',cntTick);
+$('#cntRun').addEventListener('click',()=>{clearInterval(CNT.run);CNT.run=setInterval(cntTick,600);});
+$('#cntStop').addEventListener('click',()=>{clearInterval(CNT.run);CNT.run=null;});
+$('#cntReset').addEventListener('click',()=>{clearInterval(CNT.run);CNT.run=null;CNT.q=[0,0,0,0];CNT.n=0;cntDraw();});
+cntDraw();
+
+/* ================= LAB GUIDE ================= */
+const LABS=[
+ {t:'Two-switch hallway light', ff:'No flip-flop \u2014 XOR only', diff:'Warm-up',
+  brief:`A hallway with a switch at each end. Either switch turns the light on or off, whatever the other one is doing. Exactly the wiring on your stairs at home.`,
+  think:`Work the truth table first. Both switches down: light off. One up: light on. Both up: light off again. When is the output 1? Only when the inputs are <em>different</em>.`,
+  hint:`That pattern is an XOR gate and nothing else. No memory is needed here, which is precisely why it makes a good first build \u2014 get comfortable with the simulator before you add flip-flops.`,
+  steps:['Place two toggle switches, A and B','Feed both into one XOR gate','XOR output to an LED','Test all four combinations against your table'],
+  ext:`Add a master switch that kills the light regardless. You will need an AND gate between the XOR and the LED.`},
+ {t:'Push-button toggle', ff:'JK (or T)', diff:'Start here for flip-flops',
+  brief:`One push button, one LED. Press once, LED on. Press again, LED off. Like the power button on a controller.`,
+  think:`A plain button only makes the LED light while you hold it. You need something that remembers which state it was in and flips. That is a toggle.`,
+  hint:`Tie J and K both to 1 and the JK flip-flop toggles on every clock pulse. Then feed the button into CLK instead of into a data input \u2014 the press <em>is</em> the clock edge.`,
+  steps:['One JK flip-flop','J to logic 1, K to logic 1','Push button to CLK','PRE\u2032 and CLR\u2032 to toggle switches, both ON','Q to an LED'],
+  ext:`Add a second LED on Q\u2032 so one is always on and the other always off. Then add a push button on CLR\u2032 as a hard reset.`},
+ {t:'Digital door lock', ff:'SR', diff:'Memory with two controls',
+  brief:`Two buttons, UNLOCK and LOCK. Once unlocked it stays unlocked until someone presses LOCK. Hotel-door behaviour.`,
+  think:`You need something that holds a state and has a separate way in and out of it. Two distinct commands, two distinct inputs.`,
+  hint:`This is the textbook use of an SR flip-flop: S sets and holds, R clears and holds. Think about what happens if somebody mashes both buttons \u2014 and then write a sentence in your report about why that is a real design problem, not just a theoretical one.`,
+  steps:['One SR flip-flop','UNLOCK button to S, LOCK button to R','PRE\u2032 and CLR\u2032 to toggle switches, both ON','Q to a green "unlocked" LED, Q\u2032 to a red "locked" LED','Test: unlock, release, confirm it stays unlocked'],
+  ext:`Add a timeout: a counter that automatically re-locks after a set number of clock pulses. That needs T flip-flops and a decoder \u2014 combine this with lab 5.`},
+ {t:'4-bit data register', ff:'D \u00d7 4', diff:'Core build',
+  brief:`Four input switches, a LOAD button, four LEDs. Whatever is on the switches when LOAD is pressed gets stored and displayed.`,
+  think:`Four independent bits, all captured at the same instant. You want the simplest possible "copy what you see, when I say so" behaviour.`,
+  hint:`D flip-flops, one per bit, and \u2014 this is the part people get wrong \u2014 <b>all four CLK pins wired to the same LOAD button</b>. If each bit has its own button you have four separate flip-flops, not a register.`,
+  steps:['Four D flip-flops in a row','Four toggle switches into the four D inputs','One push button into ALL four CLK pins','All PRE\u2032 and CLR\u2032 to toggle switches, ON','Four LEDs on the Q outputs','Label the bit positions 8 4 2 1'],
+  ext:`Feed the four Q outputs into a 4-bit display so the stored value shows as a decimal digit instead of four LEDs.`},
+ {t:'Frequency divider', ff:'T', diff:'The counter idea',
+  brief:`Take a fast blinking clock and produce one that blinks at exactly half the rate. Then a quarter.`,
+  think:`What kind of device changes its output once for every two input pulses? Something that flips on each pulse: it takes two flips to get back where it started.`,
+  hint:`One T flip-flop with T tied to 1 divides by 2, automatically. Chain a second one \u2014 Q of the first into CLK of the second \u2014 and you have divided by 4.`,
+  steps:['One T flip-flop, T to logic 1','Fast clock into CLK','PRE\u2032 and CLR\u2032 to toggle switches, ON','LED on Q','Watch it blink at half the input rate','Now add a second stage: Q of the first into CLK of the second'],
+  ext:`Extend to four stages and read the four outputs as a binary number. You have built the ripple counter from this page \u2014 and you should be able to explain why the chain produces counting.`},
+ {t:'Traffic light controller', ff:'T \u00d7 2 + decoder', diff:'Putting it together',
+  brief:`Green, then yellow, then red, then back to green, driven by a slow clock. Exactly one lamp on at a time.`,
+  think:`You need something that cycles through states in order, and something that turns each state into one lamp. Those are two separate jobs \u2014 do not try to do them with one circuit.`,
+  hint:`Two T flip-flops give you a 2-bit counter cycling 00, 01, 10, 11. Then a <b>decoder</b> built from AND and NOT gates turns each count into one lamp. You built decoders in topic 3 \u2014 this is the same thing with a job.`,
+  steps:['Two T flip-flops as a 2-bit counter (both T to 1, chained)','All PRE\u2032 and CLR\u2032 to toggle switches, ON','Green LED: (NOT Q1) AND (NOT Q0)','Yellow LED: (NOT Q1) AND Q0','Red LED: Q1 AND (NOT Q0)','Slow clock into the first flip-flop','Check that only one lamp is ever lit'],
+  ext:`Add a pedestrian button that forces red when pressed \u2014 an OR gate into the red lamp, and think about whether you also need to stop the counter. Or add a countdown on a 4-bit display.`}
+];
+let labI=0;
+function labDraw(){
+  $('#labSel').innerHTML=LABS.map((l,i)=>
+    `<button class="tab" data-i="${i}" aria-pressed="${i===labI}">Lab ${i+1}</button>`).join('');
+  const l=LABS[labI];
+  $('#labBody').innerHTML=`
+    <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:8px">
+      <h3>Lab ${labI+1} \u00b7 ${esc(l.t)}</h3>
+      <span class="badge set">${esc(l.ff)}</span><span class="badge hold">${esc(l.diff)}</span></div>
+    <p style="color:var(--ink2);font-size:.97rem">${esc(l.brief)}</p>
+    <div class="note" style="margin-top:14px"><b>Think it through first.</b> ${l.think}</div>
+    <div class="note win"><b>The hint, if you want it.</b> ${l.hint}</div>
+    <h4 style="margin:18px 0 8px;font-size:1rem">Build steps</h4>
+    <ol style="margin:0;padding-left:20px;color:var(--ink2);font-size:.95rem">${l.steps.map(x=>`<li>${x}</li>`).join('')}</ol>
+    <div class="note warn" style="margin-bottom:0"><b>Push it further.</b> ${l.ext}</div>`;
+}
+$('#labSel').addEventListener('click',e=>{const b=e.target.closest('.tab');if(b){labI=+b.dataset.i;labDraw();}});
+labDraw();
+
+/* ================= UNIT TEST ================= */
+const PARTS={A:'Memory & latches',B:'Clocks & edges',C:'The four flip-flops',D:'Timing diagrams',E:'Registers & counters'};
+const Q=[
+{p:'A',q:'What is the defining difference between a combinational and a sequential circuit?',opts:['Sequential circuits use more gates','A sequential circuit\u2019s output depends on the inputs and on its previous state','Combinational circuits are faster','Sequential circuits cannot use AND gates'],a:1,
+ why:'Combinational output is a function of the current inputs alone, which is why a truth table describes one completely. A sequential circuit also depends on what happened before, so it needs a clock and a characteristic table instead.'},
+{p:'A',q:'What actually allows a latch to hold a value?',opts:['A tiny capacitor inside the gate','A feedback loop \u2014 each gate\u2019s output is wired to the other\u2019s input','A battery on the chip','The clock signal holds it'],a:1,
+ why:'There is no storage element anywhere. The two gates keep confirming each other\u2019s state round a loop, and that self-sustaining agreement is the memory. Cut the loop and the value vanishes instantly.'},
+{p:'A',q:'A basic SR latch is most commonly built from:',opts:['Two cross-coupled NOR gates','Two AND gates in series','One XOR gate','Four inverters in a ring'],a:0,
+ why:'Two NOR gates with each output feeding the other input. A NAND version also exists and works the same way with the inputs active low.'},
+{p:'A',q:'In a NOR-based SR latch, what happens when S = 1 and R = 1 at the same time?',opts:['Q toggles','Q holds its value','Both Q and Q\u2032 go to 0, which is contradictory','The latch resets to 0 safely'],a:2,
+ why:'A NOR gate outputs 0 if any input is 1, so both gates are forced low. Q and Q\u2032 are supposed to be opposites, so the circuit is now asserting something impossible. This is the invalid state.'},
+{p:'A',q:'Why does RAM lose its contents when the power is removed?',opts:['The data leaks out of the wires','The feedback loops holding each bit need power to keep running','The clock stops','The operating system erases it'],a:1,
+ why:'Each cell is holding its value only because a loop keeps re-asserting it. Remove the power and the loop stops, so the value is gone \u2014 which is exactly what volatile means, and now you know the mechanism behind the word.'},
+{p:'A',q:'In normal operation, what is the relationship between Q and Q\u2032?',opts:['They are always equal','Q\u2032 is always the complement of Q','Q\u2032 is always 0','Q\u2032 lags Q by one clock cycle'],a:1,
+ why:'Q\u2032 is Q inverted, always \u2014 which is why the invalid state is so serious: it is the one situation where that guarantee breaks and both read 0.'},
+{p:'A',q:'What is a race condition?',opts:['A circuit that runs too fast','Two signals changing at once, where the outcome depends on which arrives first','A clock running at the wrong frequency','A flip-flop that will not reset'],a:1,
+ why:'Release S and R together from the invalid state and both gates try to flip at the same instant. Whichever is a fraction faster decides the result, and you cannot know which \u2014 so the circuit becomes unpredictable.'},
+{p:'B',q:'A clock runs at 2 MHz. What is its period?',opts:['2 microseconds','0.5 microseconds','2 milliseconds','0.5 milliseconds'],a:1,
+ why:'Period is 1 \u00f7 frequency. 1 \u00f7 2,000,000 = 0.0000005 s = 0.5 \u00b5s. Convert carefully \u2014 the arithmetic is easy and the unit prefixes are where marks go missing.'},
+{p:'B',q:'A rising edge is:',opts:['The clock staying high','A 1 to 0 transition','A 0 to 1 transition','The whole high half of the cycle'],a:2,
+ why:'An edge is the instant of transition, not a duration. Rising is 0\u21921, falling is 1\u21920.'},
+{p:'B',q:'What is the difference between a latch and a flip-flop?',opts:['A latch is faster','A latch is level-triggered; a flip-flop is edge-triggered','A flip-flop cannot store data','There is no difference'],a:1,
+ why:'A latch keeps watching its inputs for the whole time the enable is high, so anything wobbling in that window gets through. A flip-flop samples once at the edge and ignores everything else. This exact question appears in exams constantly.'},
+{p:'B',q:'Why do digital systems synchronise everything to one clock?',opts:['To save power','So all storage elements update together and results stay predictable','Because gates cannot work without a clock','To make circuits smaller'],a:1,
+ why:'Without a shared moment to act on, millions of elements would update at slightly different times and data would be read half-updated. The clock is the whistle everybody waits for.'},
+{p:'B',q:'A clock has a period of 0.25 seconds. What is its frequency?',opts:['0.25 Hz','2.5 Hz','4 Hz','25 Hz'],a:2,
+ why:'Frequency is 1 \u00f7 period = 1 \u00f7 0.25 = 4 Hz. Four pulses every second.'},
+{p:'B',q:'What is the main advantage of edge-triggering over level-triggering?',opts:['It uses fewer gates','The device ignores input changes that occur between edges','It works without a clock','It doubles the speed'],a:1,
+ why:'Only the value present at the instant of the edge matters, so noise and intermediate changes during the cycle are filtered out completely. That is what makes large synchronous systems possible at all.'},
+{p:'B',q:'A flip-flop is described as "negative edge-triggered". It updates on:',opts:['Every clock transition','The 0\u21921 transition','The 1\u21920 transition','The low half of the cycle'],a:2,
+ why:'Negative edge means falling edge, the 1\u21920 transition. In a timing-diagram question, always check which edge before you draw a single thing \u2014 getting this backwards makes every cycle wrong.'},
+{p:'C',q:'What is the characteristic equation of a D flip-flop?',opts:['Q(next) = D','Q(next) = D \u2295 Q','Q(next) = D\u2032','Q(next) = D \u00b7 Q'],a:0,
+ why:'Whatever is on D at the clock edge becomes Q. The simplest rule of any flip-flop, and the reason D is used for virtually all data storage.'},
+{p:'C',q:'A T flip-flop with T = 1 receives a clock pulse. What happens to Q?',opts:['It is set to 1','It is reset to 0','It flips to the opposite of what it was','Nothing'],a:2,
+ why:'T stands for toggle. With T = 1, every active edge flips Q. With T = 0 it holds \u2014 a clock pulse on its own does nothing.'},
+{p:'C',q:'A JK flip-flop has J = 1 and K = 1. What does it do on the next clock edge?',opts:['Sets to 1','Resets to 0','Toggles','Enters an invalid state'],a:2,
+ why:'This is the clever bit of the JK design. The combination that breaks an SR flip-flop is defined here as toggle, so nothing is ever undefined and you gain a useful mode for free.'},
+{p:'C',q:'A JK flip-flop has J = 0 and K = 0. What happens on the next clock edge?',opts:['Q holds its current value','Q is set to 1','Q is reset to 0','Q toggles'],a:0,
+ why:'Both inputs low means hold. A clock pulse arrives, the flip-flop considers it, and decides to change nothing.'},
+{p:'C',q:'Which input combination is invalid for an SR flip-flop?',opts:['S = 0, R = 0','S = 0, R = 1','S = 1, R = 0','S = 1, R = 1'],a:3,
+ why:'Setting and resetting at the same time is a contradiction, and the circuit responds by driving both outputs to the same value. Every other combination is well defined.'},
+{p:'C',q:'How do you turn a JK flip-flop into a T flip-flop?',opts:['Tie J and K together','Tie K to 0','Invert the clock','Connect Q\u2032 back to J'],a:0,
+ why:'With J and K joined, the only available combinations are 00 (hold) and 11 (toggle) \u2014 which is exactly the T table. This is one reason JK is called the universal flip-flop.'},
+{p:'C',q:'How do you turn a JK flip-flop into a D flip-flop?',opts:['Tie J and K together','Connect K to the inverse of J','Tie both J and K to 1','Remove the clock'],a:1,
+ why:'With K = J\u2032, the only combinations available are J=1,K=0 (set) and J=0,K=1 (reset) \u2014 so Q always ends up equal to J, which is the D behaviour.'},
+{p:'C',q:'Which flip-flop is called the universal flip-flop, and why?',opts:['D, because it is the simplest','SR, because it came first','JK, because it can be wired to behave as any of the others','T, because it toggles'],a:2,
+ why:'JK has no forbidden state and can be configured as a T or a D with a single wire change. That flexibility is what earns it the name.'},
+{p:'C',q:'An SR flip-flop currently has Q = 1. The inputs are S = 0, R = 1 when a clock edge arrives. What is Q afterwards?',opts:['1','0','Toggles to 0 then back','Invalid'],a:1,
+ why:'R = 1 with S = 0 is reset, so Q is forced to 0 regardless of what it was before. Set and reset both override the previous state entirely.'},
+{p:'C',q:'Which of these flip-flops has NO invalid input combination?',opts:['SR only','JK, D and T','SR and D','None of them'],a:1,
+ why:'Only the SR has a forbidden combination. D has a single input so it cannot contradict itself, T likewise, and JK deliberately redefines the problem combination as toggle.'},
+{p:'C',q:'What does PRE\u2032 do, and when is it active?',opts:['Forces Q = 1, active when fed 0','Forces Q = 0, active when fed 1','Forces Q = 1, active when fed 1','Pauses the clock'],a:0,
+ why:'Preset forces Q high immediately without waiting for the clock, and the prime tells you it is active LOW \u2014 it acts when you feed it 0. Leave it at 1 for normal operation, which is why labs wire it to a toggle switch left ON.'},
+{p:'C',q:'Your lab flip-flop ignores every input and Q will not change. What should you check first?',opts:['The power supply','Whether PRE\u2032 or CLR\u2032 is being held at 0','Whether the gates are faulty','The colour of the LED'],a:1,
+ why:'Those two pins override everything else instantly, so one of them sitting at 0 pins the output and nothing else you do matters. It is by a distance the most common cause of a dead flip-flop circuit in a lab.'},
+{p:'D',q:'On a timing diagram for an edge-triggered flip-flop, when is Q allowed to change?',opts:['Whenever an input changes','Only at an active clock edge','Halfway through each clock cycle','Continuously'],a:1,
+ why:'If your Q line moves anywhere other than directly beneath an active edge, you have made a mistake. Draw the edge lines first and Q can only step on them.'},
+{p:'D',q:'A D input changes three times during one clock cycle. How many of those changes affect Q?',opts:['All three','The first one','Only whatever value D holds at the clock edge','None'],a:2,
+ why:'Edge-triggering means one snapshot per edge. Everything D does between edges is invisible to the flip-flop. Exam waveforms wobble deliberately to see whether you know this.'},
+{p:'D',q:'You have drawn a timing diagram where Q changes in the middle of a clock cycle. This means:',opts:['The circuit is running fast','You have made an error \u2014 Q can only change at an edge','The flip-flop is level-triggered','The clock frequency is wrong'],a:1,
+ why:'It is a reliable self-check. Glance at your finished diagram: if any Q transition does not sit on a clock edge, go back and find where you drifted.'},
+{p:'D',q:'A JK flip-flop has J and K both permanently tied to 1. What does the Q waveform look like?',opts:['Identical to the clock','A square wave at half the clock frequency','Permanently high','Permanently low'],a:1,
+ why:'It toggles on every edge, so Q needs two clock cycles to complete one full cycle of its own. That is division by two, and it is the foundation of every binary counter.'},
+{p:'D',q:'What should be the very first thing you draw when answering a timing diagram question?',opts:['The Q waveform','Vertical lines at every active clock edge','The input waveforms','The truth table'],a:1,
+ why:'Marking the edges first turns a continuous drawing problem into a small number of separate decisions. Without those lines people end up eyeballing the shape of the inputs, which is exactly the trap.'},
+{p:'E',q:'How many flip-flops does an 8-bit register contain?',opts:['1','4','8','16'],a:2,
+ why:'One per bit. An n-bit register needs n flip-flops, almost always D types.'},
+{p:'E',q:'Why do all the flip-flops in a register share a single clock line?',opts:['To save wire','So that every bit loads at the same instant','Because flip-flops cannot have separate clocks','To reduce power'],a:1,
+ why:'If the bits arrived at different moments the register would briefly hold a mixture of old and new values \u2014 a number that was never meant to exist. A shared clock makes the whole word land together.'},
+{p:'E',q:'A ripple counter is built from 4 T flip-flops. What is the highest number it can show before rolling over?',opts:['4','8','15','16'],a:2,
+ why:'Four bits give 16 distinct states, 0 through 15. The count of states is 16; the highest value is 15. Exams ask this both ways round, so read which one is wanted.'},
+{p:'E',q:'What is the main drawback of a ripple counter?',opts:['It uses too many gates','Each stage waits for the one before it, so the outputs are briefly wrong while the change propagates','It cannot count past 8','It needs two clocks'],a:1,
+ why:'The change ripples along the chain, and during that short window the outputs show a value that was never a real count. Fine for an LED, dangerous for anything making decisions on the value.'},
+{p:'E',q:'How does a synchronous counter fix that problem?',opts:['It counts more slowly','Every flip-flop shares one clock, so all stages change together','It uses D flip-flops instead','It removes the feedback'],a:1,
+ why:'One clock to all stages means no ripple and no transient wrong values \u2014 at the cost of extra gates to work out which flip-flops should toggle. More hardware for more reliability, the same trade you met with carry-lookahead.'}
+];
+let T={order:[],i:0,answers:{}};
+const grade=p=>p>=85?'A':p>=75?'B':p>=65?'C':p>=50?'D':'F';
+function testStart(list){
+  T={order:list||Q.map((_,i)=>i),i:0,answers:{}};
+  $('#testIntro').classList.add('hide');$('#testDone').classList.add('hide');$('#reviewBox').innerHTML='';
+  $('#testRun').classList.remove('hide');testRender();
+}
+function testRender(){
+  const q=Q[T.order[T.i]];
+  $('#testPos').textContent=`${T.i+1} / ${T.order.length}`;
+  $('#testMeter').style.width=(T.i/T.order.length*100)+'%';
+  $('#testScore').textContent=`${Object.entries(T.answers).filter(([k,v])=>v===Q[k].a).length} correct`;
+  $('#qcard').innerHTML=`<span class="mono" style="font-size:.78rem;color:var(--ink3)">Question ${T.i+1}</span>
+    <span style="font-size:.72rem;background:rgba(14,124,155,.12);color:var(--hot);border-radius:5px;padding:2px 8px;margin-left:8px">Part ${q.p} \u00b7 ${PARTS[q.p]}</span>
+    <p style="font-size:1.12rem;font-family:'Space Grotesk',sans-serif;margin:10px 0 6px;line-height:1.35">${esc(q.q)}</p>
+    <div style="display:grid;gap:9px;margin-top:16px">${q.opts.map((o,i)=>
+      `<button class="opt" data-i="${i}" style="text-align:left;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:12px 15px;cursor:pointer;display:flex;gap:11px;font-size:.97rem">
+       <span class="mono" style="font-weight:700;color:var(--ink3)">${'ABCD'[i]}</span><span>${esc(o)}</span></button>`).join('')}</div>
+    <div class="feedback" id="qfb"></div>`;
+}
+$('#qcard').addEventListener('click',e=>{
+  const b=e.target.closest('.opt'); if(!b||b.disabled)return;
+  const idx=T.order[T.i],q=Q[idx],pick=+b.dataset.i;
+  T.answers[idx]=pick;
+  $$('#qcard .opt').forEach((o,i)=>{o.disabled=true;
+    if(i===q.a){o.style.background='rgba(17,141,119,.12)';o.style.borderColor='var(--mint)';}
+    else if(i===pick){o.style.background='rgba(224,75,47,.1)';o.style.borderColor='var(--red)';}});
+  const f=$('#qfb'),last=T.i===T.order.length-1;
+  f.className='feedback show '+(pick===q.a?'good':'bad');
+  f.innerHTML=`<b>${pick===q.a?'Correct.':'The answer is '+'ABCD'[q.a]+'.'}</b> ${esc(q.why)}
+    <div class="btnrow"><button class="btn accent" id="qNext">${last?'See my results':'Next question'}</button></div>`;
+  $('#qNext').addEventListener('click',()=>{if(last)return testFinish();T.i++;testRender();$('#qcard').scrollIntoView({block:'nearest'});});
+});
+function testFinish(){
+  $('#testRun').classList.add('hide');$('#testDone').classList.remove('hide');
+  const asked=T.order.length,right=T.order.filter(i=>T.answers[i]===Q[i].a).length,pct=Math.round(right/asked*100);
+  $('#doneScore').textContent=`${right}/${asked}`;
+  $('#doneGrade').textContent=`${pct}%  \u00b7  grade ${grade(pct)}`;
+  $('#doneMsg').textContent=pct>=85?'You have got the hardest topic in the unit. Most people never really understand why a latch holds \u2014 you do.'
+    :pct>=65?'Good, with specific gaps. Look at your weakest part below and go replay that section before next class.'
+    :'This is the topic that needs the most repetition, and that is normal. Go back and step through the latch dissection, then do all five timing exercises. It clicks suddenly rather than gradually.';
+  $('#doneBreak').innerHTML=Object.keys(PARTS).map(p=>{
+    const ids=T.order.filter(i=>Q[i].p===p); if(!ids.length)return '';
+    const ok=ids.filter(i=>T.answers[i]===Q[i].a).length;
+    return `<div style="display:flex;align-items:center;gap:12px;font-size:.92rem">
+      <span style="flex:1 1 auto"><b>Part ${p}</b> \u00b7 ${PARTS[p]}</span>
+      <span style="width:110px;height:8px;background:var(--lowbg);border-radius:999px;overflow:hidden">
+        <i style="display:block;height:100%;background:var(--mint);width:${ok/ids.length*100}%"></i></span>
+      <span class="mono" style="font-size:.84rem;color:var(--ink2);min-width:3.6em;text-align:right">${ok}/${ids.length}</span></div>`;
+  }).join('');
+  const missed=T.order.filter(i=>T.answers[i]!==Q[i].a);
+  $('#retryWrong').classList.toggle('hide',!missed.length);
+  $('#retryWrong').onclick=()=>testStart(missed);
+  $('#testDone').scrollIntoView({block:'start'});
+}
+$('#testStart').addEventListener('click',()=>testStart());
+$('#testQuit').addEventListener('click',testFinish);
+$('#retryAll').addEventListener('click',()=>testStart());
+$('#reviewAll').addEventListener('click',()=>{
+  $('#reviewBox').innerHTML=`<h3 style="margin:30px 0 14px">Every question, with the reasoning</h3>`+
+    Q.map((q,i)=>`<div class="panel"><span class="mono" style="font-size:.78rem;color:var(--ink3)">Q${i+1}</span>
+      <span style="font-size:.72rem;background:rgba(14,124,155,.12);color:var(--hot);border-radius:5px;padding:2px 8px;margin-left:8px">Part ${q.p}</span>
+      <p style="font-family:'Space Grotesk',sans-serif;font-size:1rem;margin:8px 0 0">${esc(q.q)}</p>
+      <p style="margin:6px 0 0"><b>${'ABCD'[q.a]}.</b> ${esc(q.opts[q.a])}</p>
+      <p style="margin:6px 0 0;color:var(--ink2);font-size:.94rem">${esc(q.why)}</p></div>`).join('');
+  $('#reviewBox').scrollIntoView({block:'start'});
+});
+</script>
+</body>
+</html>
