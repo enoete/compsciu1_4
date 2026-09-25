@@ -13,10 +13,10 @@
 <meta name="theme-color" content="#0E7C9B">
 <meta name="lesson:duration"   content="90 min">
 <meta name="lesson:difficulty" content="Core">
-<meta name="lesson:objectives" content="11">
+<meta name="lesson:objectives" content="12">
 <meta name="lesson:questions"  content="36">
 <meta name="lesson:sections"   content="10">
-<meta name="lesson:topics"     content="Latches,SR flip-flop,D flip-flop,JK flip-flop,T flip-flop,NOR vs NAND latches,Race conditions,Clock edges,Timing diagrams,Registers,Counters,Sequential circuits">
+<meta name="lesson:topics"     content="Latches,SR flip-flop,D flip-flop,JK flip-flop,T flip-flop,NOR vs NAND latches,Race conditions,Clock edges,Rising vs falling edge,Master-slave design,Timing diagrams,Registers,Counters,Sequential circuits">
 <meta name="lesson:activities" content="Latch dissection,Race condition animation,Use-case cards,NOR vs NAND contrast,Inside-the-box gate diagrams,Clock bench,Four flip-flop benches,Timing diagram trainer,Register loader,Ripple counter,Lab guide,Unit test">
 <meta name="lesson:updated"    content="2026-09-25">
 
@@ -262,6 +262,23 @@ footer{margin-top:60px;border-top:1px solid var(--line);padding:26px 0 56px;colo
     flip-flops out of latches — and "state the difference between a latch and a flip-flop" is an exam question that
     comes round like a birthday.</div>
   </div>
+
+  <div class="note" style="margin-top:18px"><b>So why would a designer ever pick falling instead of rising?</b> Not
+  for mystique — for matching. Every real chip's datasheet nails down exactly one edge, and if you wire two chips that
+  disagree about which edge means "go," they will never agree on when data is valid, no matter how correct each one is
+  on its own. <b>SPI</b>, the protocol behind most sensors and small displays, has four numbered "modes" purely to fix
+  which edge shifts data out and which edge reads it back in — get the mode wrong and the two chips are having two
+  different conversations on the same wire, and nothing you check in your own code will explain why it never works.</div>
+
+  <div class="note real"><b>Every edge-triggered flip-flop is already using both edges — you just cannot see it from
+  the outside.</b> The classic way to build one is as a <b>master-slave</b> pair: an internal latch opens on the
+  rising edge to capture whatever is on the input, then a second internal latch opens on the falling edge to release
+  that captured value out to Q. One edge loads it, the opposite edge lets it go, and the flip-flop only looks
+  "instant" from outside because both halves happen inside the same clock cycle. <b>DDR RAM</b> takes that same trick
+  and stops hiding it — DDR literally stands for <em>Double Data Rate</em>, because it transfers one chunk of data on
+  the rising edge and a second chunk on the falling edge of the very same clock line, doubling throughput without
+  raising the frequency. That matters because a higher frequency costs more power and gets harder to keep clean the
+  faster it goes. Every stick of RAM in a modern computer is quietly doing this billions of times a second.</div>
 </div></section>
 
 <section id="four"><div class="wrap">
